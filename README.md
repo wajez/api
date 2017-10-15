@@ -5,3 +5,9 @@
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](https://github.com/wajez/api/blob/master/LICENSE)
 
 REST API Development made easy.
+
+# Installation
+
+```
+npm i wajez-api --save
+```
