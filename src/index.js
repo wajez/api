@@ -1,3 +1,4 @@
-const resource = require('./resource')
-
-module.exports = {resource}
+module.exports = {
+    resource: require('./resource'),
+    auth: require('./auth')
+}
