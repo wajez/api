@@ -25,7 +25,6 @@
   "homepage": "https://github.com/wajez/api#readme",
   "dependencies": {
     "express": "^4.16.2",
-    "mongoose": "^4.12.2",
     "pluralize": "^7.0.0",
     "ramda": "^0.24.1",
     "wajez-transform": "^1.0.1"
