@@ -6,12 +6,4 @@
 
 REST API Development made easy.
 
-# Contents Table
-
-
-
-# Installation
-
-```
-npm i wajez-api --save
-```
+**This library is still under development**

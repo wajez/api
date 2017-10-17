@@ -32,6 +32,7 @@ auth(app, {
     },
     route: '/auth',
     ignore: ['/auth', '/register']
+    // {url: '/users', methods: ['GET']}
 })
 
 app.get('/me', (req, res) => {
@@ -47,8 +48,5 @@ app.use(resource(User, {
         route: '/register'
     }
 }))
-
-
-app.listen(3000)
 
 module.exports = app
