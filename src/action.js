@@ -10,7 +10,7 @@ const action = (app, params) => {
     const {method, route, beforeQuery, query, beforeJson, json, beforeSend, send, errorHandler} = make(params)
     app[method](route, (req, res) => {
         Promise.resolve(beforeQuery(req, res))
-        .then(() => res.headersSent ? null : query(req))
+        .then(() => res.headersSent ? null : query(req, res))
         .then(data => res.headersSent ? null : beforeJson(data, req, res))
         .then(data => res.headersSent ? null : json(data))
         .then(data => res.headersSent ? null : beforeSend(data, req, res))

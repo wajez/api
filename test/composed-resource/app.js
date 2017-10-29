@@ -1,29 +1,15 @@
-const express    = require('express')
-	, bodyParser = require('body-parser')
-    , mongoose   = require('mongoose')
-	, R          = require('ramda')
-    , Category   = require('./category')
-    , Post   	 = require('./post')
+const R        = require('ramda')
+    , api      = require('../../src/')
+    , insert   = require('./insert')
+    , Category = require('./category')
+    , Post     = require('./post')
     , transformers = require('./transformers')
-    , {resource} = require('../../src/')
-	, app        = express()
 
-mongoose.Promise = global.Promise
-mongoose.connect(`mongodb://localhost/chwia-api-test`, {
-	useMongoClient: true
+const app = api({
+    database: `mongodb://localhost/wajez-api`
 })
-const db = mongoose.connection
 
-app.use(bodyParser.urlencoded({
-    limit: '50mb',
-    extended: true
-}))
-
-app.use(bodyParser.json({
-    limit: '50mb'
-}))
-
-app.use(resource(Category, {
+app.resource(Category, {
     json: {
         resource: transformers.categoryResource,
         collectionItem: transformers.categoryCollectionItem
@@ -47,6 +33,8 @@ app.use(resource(Category, {
             collectionItem: transformers.postCollectionItem
         }
     }]
-}))
+})
+
+app.listen(3000)
 
 module.exports = app

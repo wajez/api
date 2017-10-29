@@ -1,57 +1,50 @@
 const R = require('ramda')
     , jwt = require('jsonwebtoken')
     , expressJWT = require('express-jwt')
+    , errorHandler = require('./error-handler')
 
-const defaultResponses = () => ({
-    accessDenied: {error: 'Unauthorized Access'},
-    wrongCredits: {error: 'Wrong Credentials'},
-    internalError: {error: 'Internal Server Error'}
-})
+const auth = (app, {secret, Model, fields, route, ignore} = {}) => {
+    if (!secret)
+        throw Error(`Wajez API: 'auth.secret' is missing`)
+    if (!Model)
+        throw Error(`Wajez API: 'auth.Model' is missing`)
+    if (!fields)
+        throw Error(`Wajez API: 'auth.fields' is missing`)
 
-const auth = (app, {secret, Model, fields, responses, route, ignore} = {}) => {
-    responses = R.merge(defaultResponses(), responses || {})
     route = route || '/auth'
     ignore = ignore || []
 
     app.use(expressJWT({secret}).unless({path: ignore}))
-
-    app.use(function (err, req, res, next) {
-        if (err.name === 'UnauthorizedError')
-            return res.status(401).json(responses.accessDenied)
-        next()
-    })
 
     app.use((req, res, next) => {
         if (req.user) {
             Model.findOne({_id: req.user.id})
             .then(user => {
                 if (user === null)
-                    return res.status(401).json(responses.accessDenied)
+                    return errorHandler({name: 'UnauthorizedError'}, req, res, next)
                 req.user = user
                 next()
             })
+            .catch(err => errorHandler(err, req, res, next))
         } else
             next()
     })
 
-    app.post(route, (req, res) => {
+    app.post(route, (req, res, next) => {
         const filter = {}
         for(let i = 0; i < fields.length; i ++) {
             if (!req.body[fields[i]])
-                return res.status(401).json(responses.wrongCredits)
+                return errorHandler({name: 'WrongCredentialsError'}, req, res, next)
             filter[fields[i]] = req.body[fields[i]]
         }
         Model.findOne(filter)
         .then(user => {
             if (null === user)
-                return res.status(401).json(responses.wrongCredits)
+                return errorHandler({name: 'WrongCredentialsError'}, req, res, next)
             const token = jwt.sign({id: user.id}, secret)
             res.json({token})
         })
-        .catch(err => {
-            console.error(err)
-            res.status(500).json(responses.internalError)
-        })
+        .catch(err => errorHandler(err, req, res, next))
     })
 }
 

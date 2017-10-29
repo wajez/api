@@ -7,3 +7,25 @@
 REST API Development made easy.
 
 **This library is still under development**
+
+# Table of Contents
+
+- Introduction
+- Installation
+- Adding REST Resource
+- Authentication
+- Development Notes
+
+# Introduction
+
+The aim of this library is to make the development of REST APIs using [express]() and [mongoose]() as easy as possible. It provides useful methods to build a fully functional REST API in minutes. These methods can be used within any project based on `express` and `mongoose` and do not require any specific configuration.
+
+# Installation
+
+```
+npm i --save wajez-api
+```
+
+# Adding REST Resource
+
+...

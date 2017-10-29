@@ -2,6 +2,7 @@ const R = require('ramda')
     , express  = require('express')
     , {plural} = require('pluralize')
     , action   = require('./action')
+    , paginate = require('./paginate')
 
 const pluralize = word => {
     const words = word.replace(/\.?([A-Z]+)/g, (x, y) => '-' + y.toLowerCase())
@@ -27,10 +28,22 @@ const checkId = (req, res) => {
         notFound(res, req.params.id)
 }
 
-const defaultAll = (Model, routes, json) => ({
+const defaultAll = (Model, routes, json, fields) => ({
     method: 'get',
     route: routes.collection,
-    query: req => Model.find({}),
+    query: req => {
+        let q = Model.find({}).skip(req.wz.offset).limit(req.wz.limit)
+        fields.forEach(field => {
+            q = q.populate({
+                path: field,
+                options: {
+                    skip: req.wz[field+'-offset'],
+                    limit: req.wz[field+'-limit']
+                }
+            })
+        })
+        return q
+    },
     json: R.map(json.collectionItem)
 })
 
@@ -41,7 +54,13 @@ const defaultGet = (Model, routes, json, fields) => ({
     query: req => {
         let q = Model.findOne({_id: req.params.id})
         fields.forEach(field => {
-            q = q.populate(field)
+            q = q.populate({
+                path: field,
+                options: {
+                    skip: req.wz[field+'-offset'],
+                    limit: req.wz[field+'-limit']
+                }
+            })
         })
         return q
     },
@@ -64,7 +83,13 @@ const defaultEdit = (Model, routes, json, fields) => ({
     query: req => {
         let q = Model.findOneAndUpdate({_id: req.params.id}, req.body, {new: true, runValidators: true})
         fields.forEach(field => {
-            q = q.populate(field)
+            q = q.populate({
+                path: field,
+                options: {
+                    skip: req.wz[field+'-offset'],
+                    limit: req.wz[field+'-limit']
+                }
+            })
         })
         return q
     },
@@ -84,7 +109,13 @@ const defaultChildAll = (Model, routes, {route, field, json} = {}) => ({
     method: 'get',
     route: route || routes.resource + '/' + field,
     beforeQuery: checkId,
-    query: req => Model.findOne({_id: req.params.id}).populate(field),
+    query: req => Model.findOne({_id: req.params.id}).populate({
+        path: field,
+        options: {
+            skip: req.wz.offset,
+            limit: req.wz.limit
+        }
+    }),
     beforeJson: (data, req, res) => (data === null) ? notFound(res, req.params.id) : data[field],
     json: R.map(json.collectionItem)
 })
@@ -112,21 +143,17 @@ const defaultChildAdd = (Model, routes, child) => ({
     json: child.json.resource
 })
 
-const make = (Model, {json, beforeQuery, beforeJson, beforeSend, errorHandler, all, get, add, edit, remove, children} = {}) => {
+const makeActions = (Model, {json, beforeQuery, beforeJson, beforeSend, errorHandler, pagination, all, get, add, edit, remove, children} = {}) => {
     beforeQuery = beforeQuery || (() => null)
     beforeJson = beforeJson || R.identity
     beforeSend = beforeSend || R.identity
-    errorHandler = errorHandler || ((err, req, res) => {
-        res.status(500).json({error: 'Internal Server Error'})
-        console.error(err)
-    })
     routes = defaultRoutes(Model)
     children = children || []
     const fields = children.map(child => child.field)
     const send = (data, res) => res.send(data)
     const defaults = {beforeQuery, beforeJson, beforeSend, send, errorHandler}
     const actions = [
-        R.mergeAll([defaults, defaultAll(Model, routes, json), all || {}]),
+        R.mergeAll([defaults, defaultAll(Model, routes, json, fields), all || {}]),
         R.mergeAll([defaults, defaultAdd(Model, routes, json), add || {}]),
         R.mergeAll([defaults, defaultGet(Model, routes, json, fields), get || {}]),
         R.mergeAll([defaults, defaultEdit(Model, routes, json, fields), edit || {}]),
@@ -140,10 +167,20 @@ const make = (Model, {json, beforeQuery, beforeJson, beforeSend, errorHandler, a
     return actions
 }
 
+const makeMiddlewares = ({children, pagination} = {}) => {
+    const middlewares = []
+    children = children || []
+    if (pagination)
+        middlewares.push(paginate(pagination, children.map(R.prop('field'))))
+    return middlewares
+}
+
 const resource = (Model, params) => {
     const router  = express.Router()
-        , actions = make(Model, params)
+        , actions = makeActions(Model, params)
+        , middlewares = makeMiddlewares(params)
 
+    middlewares.forEach(middleware => router.use(middleware))
     actions.forEach(parameters => action(router, parameters))
 
     return router

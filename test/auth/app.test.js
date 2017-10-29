@@ -4,7 +4,7 @@ const R    = require('ramda')
     , User = require('./user')
     , it   = test(app)
 
-describe('Test Authentification', () => {
+describe('Authentication Test', () => {
     let token = null,
         user = null,
         data = {
