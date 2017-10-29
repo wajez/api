@@ -4,6 +4,7 @@ const R = require('ramda')
     , resource = require('./resource')
     , bodyParser = require('body-parser')
     , authenticate = require('./auth')
+    , corsMiddleware = require('cors')
     , defaultErrorHandler = require('./error-handler')
 
 const connect = database => {
@@ -20,7 +21,7 @@ const defaultPagination = () => ({
     defaultLimit: 50
 })
 
-const api = ({database, bodyLimit, pagination, errorHandler, auth} = {}) => {
+const api = ({database, bodyLimit, pagination, errorHandler, auth, cors} = {}) => {
     if (! database)
         throw Error(`Wajez API: 'database' is missing`)
     bodyLimit = bodyLimit || '50mb'
@@ -35,6 +36,8 @@ const api = ({database, bodyLimit, pagination, errorHandler, auth} = {}) => {
 
     if (auth)
         authenticate(app, auth)
+    if (cors !== false)
+        app.use(corsMiddleware(cors))
 
     app.resource = (Model, params) =>
         app.use(resource(Model, R.mergeDeepRight({errorHandler, pagination}, params)))

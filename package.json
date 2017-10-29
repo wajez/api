@@ -1,6 +1,6 @@
 {
   "name": "wajez-api",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "REST API Development made easy.",
   "main": "src/index.js",
   "scripts": {
@@ -24,11 +24,12 @@
   },
   "homepage": "https://github.com/wajez/api#readme",
   "dependencies": {
+    "body-parser": "^1.18.2",
+    "cors": "^2.8.4",
     "express": "^4.16.2",
     "express-api-queryhandler": "^0.4.3",
     "express-jwt": "^5.3.0",
     "jsonwebtoken": "^8.1.0",
-    "body-parser": "^1.18.2",
     "mongoose": "^4.12.2",
     "pluralize": "^7.0.0",
     "ramda": "^0.24.1",
