@@ -12,9 +12,9 @@ const auth = (app, {secret, Model, fields, route, ignore} = {}) => {
         throw Error(`Wajez API: 'auth.fields' is missing`)
 
     route = route || '/auth'
-    ignore = ignore || []
+    ignore = ignore || {}
 
-    app.use(expressJWT({secret}).unless({path: ignore}))
+    app.use(expressJWT({secret}).unless(ignore))
 
     app.use((req, res, next) => {
         if (req.user) {

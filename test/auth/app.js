@@ -14,7 +14,7 @@ const app = api({
             internalError: {error: 'Internal Server Error'}
         },
         route: '/auth',
-        ignore: ['/auth', '/register']
+        ignore: {path: ['/auth', '/register']}
     }
 })
 
