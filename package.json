@@ -1,6 +1,6 @@
 {
   "name": "wajez-api",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "REST API Development made easy.",
   "main": "src/index.js",
   "scripts": {
