@@ -1,18 +1,18 @@
 const R = require('ramda')
     , jwt = require('jsonwebtoken')
     , expressJWT = require('express-jwt')
-    , errorHandler = require('./error-handler')
+    , defaultErrorHandler = require('./error-handler')
 
-const auth = (app, {secret, Model, fields, route, ignore} = {}) => {
+const auth = (app, {secret, Model, fields, route, ignore, errorHandler} = {}) => {
     if (!secret)
         throw Error(`Wajez API: 'auth.secret' is missing`)
     if (!Model)
         throw Error(`Wajez API: 'auth.Model' is missing`)
     if (!fields)
         throw Error(`Wajez API: 'auth.fields' is missing`)
-
     route = route || '/auth'
     ignore = ignore || {}
+    errorHandler = errorHandler || defaultErrorHandler
 
     app.use(expressJWT({secret}).unless(ignore))
 

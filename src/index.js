@@ -39,7 +39,7 @@ const api = ({database, bodyLimit, pagination, errorHandler, auth, cors} = {}) =
         app.options('*', corsMiddleware(cors))
     }
     if (auth)
-        authenticate(app, auth)
+        authenticate(app, R.merge({errorHandler}, auth))
 
     app.resource = (Model, params) =>
         app.use(resource(Model, R.mergeDeepRight({errorHandler, pagination}, params)))
