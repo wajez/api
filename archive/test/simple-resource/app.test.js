@@ -6,7 +6,7 @@ const R    = require('ramda')
 test(app).resource(User, {
 	create: ['name', 'email', 'password'],
 	json: {
-        resource: R.pick(['id', 'name', 'email', 'token']),
+        resource: R.pick(['id', 'name', 'email']),
         collectionItem: R.pick(['id', 'name', 'email'])
 	}
 })

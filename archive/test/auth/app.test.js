@@ -13,7 +13,7 @@ describe('Authentication Test', () => {
             password: '0123456789'
         }
 
-    before(() => User.remove({}).catch(console.error))
+    before(() => User.remove({}))
 
     it.get('/users', {
         status: 401
@@ -53,5 +53,5 @@ describe('Authentication Test', () => {
         body: () => user
     })
 
-    after(() => User.remove({}).catch(console.error))
+    after(() => User.remove({}))
 })

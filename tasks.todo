@@ -1,0 +1,18 @@
+queries:
+  ☐ add pagination: parameters offset and limit
+  ☐ add sorting: parameter sort (+field || -field)
+  ☐ add filters: parameter where (field:val,field:val,field>val,field<val,field%val)
+
+error handling:
+  ☐ improve default error handler
+  ☐ possibility to add handlers for specific errors at app or resource level
+
+less code:
+ ☐ generate default transformers
+
+docs:
+ ☐ write good documentation
+
+flexible and generic:
+ ☐ make generic recursivity; default to 1 with way to increase/specify more
+ ☐ abstract the database framework, should not be tied to mongoose!

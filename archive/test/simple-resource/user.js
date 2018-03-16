@@ -14,15 +14,6 @@ const schema = new Schema({
     password: {
     	type: String,
     	minLength: 8
-    },
-    token: {
-    	type: String,
-    	minLength: 64,
-    	maxLength: 64
-    },
-    expire: {
-    	type: Date,
-    	min: new Date
     }
 })
 

@@ -11,11 +11,6 @@ app.resource(User, {
     json: {
         resource: R.pick(['id', 'name', 'email', 'token']),
         collectionItem: R.pick(['id', 'name', 'email'])
-    },
-    add: {
-        beforeQuery: req => {
-            req.body.token = '0123456789012345678901234567890123456789012345678901234567890123'
-        }
     }
 })
 

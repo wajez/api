@@ -1,189 +1,117 @@
-const R = require('ramda')
-    , express  = require('express')
-    , {plural} = require('pluralize')
-    , action   = require('./action')
-    , paginate = require('./paginate')
+const R       = require('ramda')
+    , express = require('express')
 
-const pluralize = word => {
-    const words = word.replace(/\.?([A-Z]+)/g, (x, y) => '-' + y.toLowerCase())
-        .replace(/^-/, '')
-        .split('-')
-    words.push(plural(words.pop()))
-    return words.join('-')
+/**
+ * ResourceConfig = {
+ *   database: {
+ *     interface: 'mongoose' // more interfaces should be added
+ *     mapper: object        // instance of the database mapper
+ *     uri: string           // ex: `mongodb://localhost/myapi`
+ *   }
+ * }
+ *
+ * Resource = [Action]
+ *
+ * Action = {
+ *   order: number,
+ *   type: 'middleware' | 'route'
+ *   content: Middleware | Route
+ * }
+ *
+ * Middleware = Handler | ErrorHandler
+ *
+ * Handler = (Request, Response, Next) => void
+ *
+ * ErrorHandler = (Error, Request, Response, Next) => void
+ *
+ * Route = {
+ *   method: 'get' | 'post' | 'put' | 'delete'
+ *   uri: string
+ *   handlers: [{
+ *     step: RouteStep
+ *     fn: Handler
+ *   }]
+ * }
+ *
+ * RouteStep = Enum {
+ *   BEFORE_QUERY = 1
+ *   AT_QUERY     = 2
+ *   AFTER_QUERY  = 3
+ *   BEFORE_JSON  = 4
+ *   AT_JSON      = 5
+ *   AFTER_JSON   = 6
+ *   BEFORE_SEND  = 7
+ *   AT_SEND      = 8
+ *   AFTER_SEND   = 9
+ * }
+ */
+
+/**
+ * Creates an express Router for a resource.
+ *
+ * @param  {ResourceConfig} config
+ * @param  {Model}          model
+ * @return {Router}
+ */
+const resource = (config, model) => {
+    const actions = make(config, model)
+    return actions.reduce(apply, express.Router())
 }
 
-const defaultRoutes = Model => {
-    const names = pluralize(Model.modelName)
-    return {
-        collection: `/${names}`,
-        resource: `/${names}/:id`
-    }
-}
-
-const notFound = (res, id) =>
-    res.status(404).json({ error: `Unable to find resource with id '${id}'` })
-
-const checkId = (req, res) => {
-    if (! req.params.id.match(/^[0-9a-fA-F]{24}$/))
-        notFound(res, req.params.id)
-}
-
-const defaultAll = (Model, routes, json, fields) => ({
-    method: 'get',
-    route: routes.collection,
-    query: req => {
-        let q = Model.find({}).skip(req.wz.offset).limit(req.wz.limit)
-        fields.forEach(field => {
-            q = q.populate({
-                path: field,
-                options: {
-                    skip: req.wz[field+'-offset'],
-                    limit: req.wz[field+'-limit']
-                }
-            })
-        })
-        return q
-    },
-    json: R.map(json.collectionItem)
-})
-
-const defaultGet = (Model, routes, json, fields) => ({
-    method: 'get',
-    route: routes.resource,
-    beforeQuery: checkId,
-    query: req => {
-        let q = Model.findOne({_id: req.params.id})
-        fields.forEach(field => {
-            q = q.populate({
-                path: field,
-                options: {
-                    skip: req.wz[field+'-offset'],
-                    limit: req.wz[field+'-limit']
-                }
-            })
-        })
-        return q
-    },
-    beforeJson: (data, req, res) => (data === null) ? notFound(res, req.params.id) : data,
-    json: json.resource
-})
-
-const defaultAdd = (Model, routes, json) => ({
-    method: 'post',
-    route: routes.collection,
-    query: req => Model.create(req.body),
-    json: json.resource,
-    send: (data, res) => res.status(201).json(data)
-})
-
-const defaultEdit = (Model, routes, json, fields) => ({
-    method: 'put',
-    route: routes.resource,
-    beforeQuery: checkId,
-    query: req => {
-        let q = Model.findOneAndUpdate({_id: req.params.id}, req.body, {new: true, runValidators: true})
-        fields.forEach(field => {
-            q = q.populate({
-                path: field,
-                options: {
-                    skip: req.wz[field+'-offset'],
-                    limit: req.wz[field+'-limit']
-                }
-            })
-        })
-        return q
-    },
-    beforeJson: (data, req, res) => (data === null) ? notFound(res, req.params.id) : data,
-    json: json.resource
-})
-
-const defaultRemove = (Model, routes, json) => ({
-    method: 'delete',
-    route: routes.resource,
-    beforeQuery: checkId,
-    query: req => Model.remove({_id: req.params.id}),
-    json: () => ({})
-})
-
-const defaultChildAll = (Model, routes, {route, field, json} = {}) => ({
-    method: 'get',
-    route: route || routes.resource + '/' + field,
-    beforeQuery: checkId,
-    query: req => Model.findOne({_id: req.params.id}).populate({
-        path: field,
-        options: {
-            skip: req.wz.offset,
-            limit: req.wz.limit
+/**
+ * Makes a resource actions (ie. middlewares, routes and error handlers).
+ *
+ * @param  {ResourceConfig} config
+ * @param  {Model} model
+ * @return {Resource}
+ */
+const make = (config, model) => {
+    return [{
+        order: 1,
+        type: 'route',
+        content: {
+            method: 'get',
+            uri: '/',
+            handlers: [
+                {step: 2, fn: (req, res, next) => { req.wz.data = 'world!'; next() }},
+                {step: 1, fn: (req, res, next) => { req.wz = {}; next() }},
+                {step: 3, fn: (req, res, next) => { res.json({hello: req.wz.data}) }},
+            ]
         }
-    }),
-    beforeJson: (data, req, res) => (data === null) ? notFound(res, req.params.id) : data[field],
-    json: R.map(json.collectionItem)
-})
-
-const defaultChildAdd = (Model, routes, child) => ({
-    method: 'post',
-    route: child.route || routes.resource + '/' + child.field,
-    beforeQuery: checkId,
-    query: req => Model.findOne({_id: req.params.id}),
-    beforeJson: (data, req, res) => {
-        if (data === null)
-            return notFound(res, req.params.id)
-        if (child.reference)
-            req.body[child.reference] = data.id
-        return child.Model.create(req.body)
-            .then(childData => {
-                data[child.field].push(childData)
-                return Promise.all([
-                    Promise.resolve(childData),
-                    Model.findOneAndUpdate({_id: data.id}, data, {new: true, runValidators: true})
-                ])
-            })
-            .then(pair => pair[0])
-    },
-    json: child.json.resource
-})
-
-const makeActions = (Model, {json, beforeQuery, beforeJson, beforeSend, errorHandler, pagination, all, get, add, edit, remove, children} = {}) => {
-    beforeQuery = beforeQuery || (() => null)
-    beforeJson = beforeJson || R.identity
-    beforeSend = beforeSend || R.identity
-    routes = defaultRoutes(Model)
-    children = children || []
-    const fields = children.map(child => child.field)
-    const send = (data, res) => res.send(data)
-    const defaults = {beforeQuery, beforeJson, beforeSend, send, errorHandler}
-    const actions = [
-        R.mergeAll([defaults, defaultAll(Model, routes, json, fields), all || {}]),
-        R.mergeAll([defaults, defaultAdd(Model, routes, json), add || {}]),
-        R.mergeAll([defaults, defaultGet(Model, routes, json, fields), get || {}]),
-        R.mergeAll([defaults, defaultEdit(Model, routes, json, fields), edit || {}]),
-        R.mergeAll([defaults, defaultRemove(Model, routes, json), remove || {}])
-    ];
-    children.forEach(child => {
-        if (child.route === false) return;
-        actions.push(R.mergeAll([defaults, defaultChildAll(Model, routes, child), child.all || {}]))
-        actions.push(R.mergeAll([defaults, defaultChildAdd(Model, routes, child), child.add || {}]))
-    })
-    return actions
+    }, {
+        type: 'middleware',
+        content: (err, req, res, next) => {
+            res.status(200).json({hello: err})
+            next()
+        }
+    }]
 }
 
-const makeMiddlewares = ({children, pagination} = {}) => {
-    const middlewares = []
-    children = children || []
-    if (pagination)
-        middlewares.push(paginate(pagination, children.map(R.prop('field'))))
-    return middlewares
-}
-
-const resource = (Model, params) => {
-    const router  = express.Router()
-        , actions = makeActions(Model, params)
-        , middlewares = makeMiddlewares(params)
-
-    middlewares.forEach(middleware => router.use(middleware))
-    actions.forEach(parameters => action(router, parameters))
-
+/**
+ * Applies an action to an express router.
+ * **This function is not pure; it changes the given router**.
+ *
+ * @param  {Router} router
+ * @param  {Action} action
+ * @return {Router}
+ */
+const apply = (router, action) => {
+    switch (action.type) {
+        case 'middleware':
+            router.use(action.content)
+        break
+        case 'route':
+            const {method, uri, handlers} = action.content
+            const fns = R.pipe(
+                R.sort((a, b) => a.step - b.step),
+                R.map(R.prop('fn'))
+            )(handlers)
+            router[method](uri, ...fns)
+        break
+        default:
+            throw `Unknow action type '${action.type}'`
+    }
     return router
 }
 
-module.exports = resource
+module.exports = {resource, make, apply}
