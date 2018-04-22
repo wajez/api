@@ -1,6 +1,6 @@
 queries:
-  ☐ add pagination: parameters offset and limit
-  ☐ add sorting: parameter sort (+field || -field)
+  ✔ add pagination: parameters offset and limit @done (18-05-07 01:46)
+  ✔ add sorting: parameter sort (+field || -field) @done (18-05-07 01:46)
   ☐ add filters: parameter where (field:val,field:val,field>val,field<val,field%val)
 
 error handling:
@@ -8,7 +8,7 @@ error handling:
   ☐ possibility to add handlers for specific errors at app or resource level
 
 less code:
- ☐ generate default transformers
+ ✔ generate default transformers @done (18-05-07 01:48)
 
 docs:
  ☐ write good documentation
