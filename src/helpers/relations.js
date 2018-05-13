@@ -22,24 +22,4 @@ const relationsOf = def('relationsOf', {}, [T.MongooseModel, $.Array(T.Relation)
   }
 )
 
-const getRelatedFields = def('getRelatedFields', {}, [T.MongooseModel, $.Array($.String)],
-  parent => {
-    const {fields} = model(parent)
-    return Object.keys(fields).filter(key => {
-      const {type, schema} = fields[key]
-      return type === 'reference' || (type === 'array' && schema.type === 'reference')
-    })
-  }
-)
-
-const getRelatedArrayFields = def('getRelatedFields', {}, [T.MongooseModel, $.Array($.String)],
-  parent => {
-    const {fields} = model(parent)
-    return Object.keys(fields).filter(key => {
-      const {type, schema} = fields[key]
-      return type === 'array' && schema.type === 'reference'
-    })
-  }
-)
-
-module.exports = {relationsOf, getRelatedFields, getRelatedArrayFields, inverseRelation}
+module.exports = {relationsOf, inverseRelation}
