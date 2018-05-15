@@ -44,4 +44,12 @@ const remove = def('remove', {}, [$.String, $.Array(T.RouteAction), T.Route],
   })
 )
 
-module.exports = {get, post, put, remove}
+const extend = def('extend', {}, [T.Route, $.Object, T.Route],
+  (route, {uri, method, actions}) => ({
+    uri: uri || route.uri,
+    method: method || route.method,
+    actions: route.actions.concat(actions || [])
+  })
+)
+
+module.exports = {get, post, put, remove, extend}

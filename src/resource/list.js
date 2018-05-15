@@ -1,7 +1,7 @@
 const {$, def, S} = require('wajez-utils')
 const T = require('../types')
 const helpers = require('../helpers')
-const {get} = require('../routes')
+const {get, extend} = require('../routes')
 const {onQuery, onRun, onConvert} = require('../actions')
 const {merge, applyConverter} = require('wajez-utils')
 const {
@@ -10,7 +10,7 @@ const {
 } = require('../middlewares')
 
 const list = (model, {converter, uri, actions} = {}) =>
-  get(uri || helpers.uri(model), [
+  extend(get(helpers.uri(model), [
     onQuery(setQuery(async req => ({
       type: 'find',
       conditions: {},
@@ -24,6 +24,6 @@ const list = (model, {converter, uri, actions} = {}) =>
     }))),
     onRun(runQuery(model)),
     onConvert(convertData(helpers.routeConverter(model, converter || {})))
-  ].concat(actions || []))
+  ]), {uri, actions})
 
 module.exports = {list}

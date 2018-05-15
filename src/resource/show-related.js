@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const {$, def, S, model} = require('wajez-utils')
 const T = require('../types')
 const helpers = require('../helpers')
-const {get} = require('../routes')
+const {get, extend} = require('../routes')
 const {onQuery, onRun, beforeConvert, onConvert} = require('../actions')
 const {
   setQuery, runQuery, convertData, setData,
@@ -20,9 +20,8 @@ const showRelated = ({type, source, target}, config = {}) => {
 }
 
 const showOneRelated = def('showOneRelated', {}, [T.MongooseModel, T.MongooseModel, $.String, T.RouteConfig, T.Route],
-  (parent, child, field, {uri, converter, actions} = {}) => {
-    uri = uri || helpers.uri(parent) + '/:id/' + field
-    return get(uri, [
+  (parent, child, field, {uri, converter, actions} = {}) =>
+    extend(get(helpers.uri(parent) + '/:id/' + field, [
       onQuery(setQuery(async req => ({
         type: 'find',
         conditions: {_id: req.params.id},
@@ -43,8 +42,7 @@ const showOneRelated = def('showOneRelated', {}, [T.MongooseModel, T.MongooseMod
         return !instance ? null : (instance[field] || null)
       })),
       onConvert(convertData(helpers.routeConverter(child, converter || {})))
-    ].concat(actions || []))
-  }
+    ]), {uri, actions})
 )
 
 const showManyRelated = def('showManyRelated', {}, [T.MongooseModel, T.MongooseModel, $.String, T.RouteConfig, T.Route],
