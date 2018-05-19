@@ -15,7 +15,7 @@ const list = (model, {converter, uri, actions} = {}) =>
     onReadParams(setRoute('list')),
     onQuery(setQuery(async req => ({
       type: 'find',
-      conditions: {},
+      conditions: req.body || {},
       projection: null,
       options: {
         skip: getOffset(req),

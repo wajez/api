@@ -486,6 +486,7 @@ Constructs a route that returns a list of the given model, then merges the `conv
 
 - `GET /plural-of-model-name`
 - The default converter returns only fields of basic types (`String`, `Number`, `Boolean`, `Buffer`, `Date`) and the `id` of the document. It ignores all `ObjectId`, `Object` and `Array` fields.
+- Conditions on `req.body` will be used to filter the results.
 - The offset parameter is set from query parameter `offset`, same for limit and sort parameters.
 - Default values for offset and limit are `0` and `100` respectively. No sort is defined by default.
 
@@ -705,6 +706,8 @@ Returns an express router containing all [`resource`](#resource) routes of all g
 
 # Development Notes
 
-- **1.1.0**: Added [`extend`](#extend), [`login`](#login) and [`auth`](#auth).
+- **1.2.0:** `req.body` is now used to filter results on `list` and `show-many-related` routes.
 
-- **1.0.0**: A complete version is finally out!
+- **1.1.0:** Added [`extend`](#extend), [`login`](#login) and [`auth`](#auth).
+
+- **1.0.0:** A complete new version is finally out!

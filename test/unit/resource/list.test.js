@@ -36,9 +36,12 @@ describe('Unit > Resource > list', () => {
     assertRoute(list(User), {
       method: 'get',
       uri: '/users',
+      req: {
+        body: {name: 'Sasuke'}
+      },
       query: {
         type: 'find',
-        conditions: {},
+        conditions: {name: 'Sasuke'},
         projection: null,
         options: {
           skip: 0,

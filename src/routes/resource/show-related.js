@@ -63,7 +63,7 @@ const showManyRelated = def('showManyRelated', {}, [T.MongooseModel, T.MongooseM
         },
         populate: [{
           path: field,
-          match: {},
+          match: req.body || {},
           select: null,
           options: {
             skip: getOffset(req),
