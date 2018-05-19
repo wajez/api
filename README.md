@@ -1,8 +1,9 @@
 # Wajez API
 
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/webneat)
 [![Build Status](https://travis-ci.org/wajez/api.svg?branch=master)](https://travis-ci.org/wajez/api)
+[![Join the chat at https://gitter.im/wajez/api](https://badges.gitter.im/wajez/api.svg)](https://gitter.im/wajez/api?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Coverage Status](https://coveralls.io/repos/github/wajez/api/badge.svg)](https://coveralls.io/github/wajez/api)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/webneat)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](https://github.com/wajez/api/blob/master/LICENSE)
 
 REST API Development made easy.
@@ -23,7 +24,7 @@ REST API Development made easy.
 
 # What is that?
 
-**Wajez API** is a library built on top of `express` and `mongoose` to make developing REST APIs as easy as possible while being able to control everything and override any behavior.
+**Wajez API** is a library built on top of `express` and `mongoose` to make developing REST APIs as easy as possible while being able to control everything and override any behavior. I tried to build this library following the Functional Programming style using the beautiful library [Sanctuary](https://sanctuary.js.org/).
 
 # Installation
 
@@ -173,7 +174,7 @@ Yes, all that is possible and easy to do. [Check this demo application for a com
 
 # API Reference
 
-I tried to build this library following the Functional Programming style using the beautiful library [Sanctuary](https://sanctuary.js.org/). Let's start by listing the defined data types in this library.
+Let's start by listing the defined data types in this library.
 
 ## Types
 
