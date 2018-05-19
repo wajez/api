@@ -35,7 +35,6 @@ const Category = mongoose.model('Category', new Schema({
   }],
   name: {
     type: String,
-    required: true,
     unique: true
   }
 }))
@@ -72,12 +71,10 @@ const Account = mongoose.model('Account', new Schema({
     type: String,
     match: /^[^@]{2,30}@.{2,30}$/,
     unique: true,
-    required: true
   },
   password: {
     type: String,
     minLength: 8,
-    required: true
   }
 }))
 
@@ -102,7 +99,6 @@ const Post = mongoose.model('Post', new Schema({
     type: String,
     minLength: 5,
     maxLength: 50,
-    required: true
   },
   content: String
 }))
@@ -126,7 +122,6 @@ const Tag = mongoose.model('Tag', new Schema({
   }],
   name: {
     type: String,
-    required: true,
     unique: true
   }
 }))
