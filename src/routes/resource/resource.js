@@ -1,6 +1,6 @@
 const {$, def, merge} = require('wajez-utils')
-const T = require('../types')
-const {inverseRelation} = require('../helpers')
+const T = require('../../types')
+const {inverseRelation} = require('../../helpers')
 const {list} = require('./list')
 const {add} = require('./add')
 const {edit} = require('./edit')
@@ -12,7 +12,7 @@ const resource = def('resource', {}, [T.MongooseModel, T.ResourceConfig, $.Array
   (model, config) => {
     const routes = []
 
-    const defaults = {relations: config.relations || []}
+    const defaults = merge({relations: config.relations || []}, config.defaults || {})
     routes.push(list(model, merge(defaults, config.list || {})))
     routes.push(add(model, merge(defaults, config.add || {})))
     routes.push(edit(model, merge(defaults, config.edit || {})))

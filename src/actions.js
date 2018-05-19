@@ -18,8 +18,11 @@ const Steps = {
 
 const empty = S.K((req, res, next) => next())
 
-const action = def('action', {}, [$.Number, T.Middleware, T.RouteAction],
-  (step, middleware) => ({step, middleware})
+const action = def('action', {}, [$.Number, $.Any, T.RouteAction],
+  (step, mws) => ({
+    step,
+    middlewares: mws.constructor === Array ? mws : [mws]
+  })
 )
 
 const onStart       = action(Steps.onStart)

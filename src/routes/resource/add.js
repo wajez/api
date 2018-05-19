@@ -1,12 +1,14 @@
 const {$, def, S} = require('wajez-utils')
-const T = require('../types')
-const helpers = require('../helpers')
-const {post, extend} = require('../routes')
-const {onQuery, onRun, onConvert} = require('../actions')
-const {setQuery, runQuery, convertData} = require('../middlewares')
+const T = require('../../types')
+const helpers = require('../../helpers')
+const {post, extend} = require('../basic')
+const {onQuery, onRun, onConvert, onReadParams} = require('../../actions')
+const {setQuery, runQuery, convertData, setRoute, setModel} = require('../../middlewares')
 
 const add = (model, {converter, uri, actions, relations} = {}) =>
   extend(post(helpers.uri(model), [
+    onReadParams(setModel(model.modelName)),
+    onReadParams(setRoute('add')),
     onQuery(setQuery(async req => ({
       type: 'create',
       data: req.body,

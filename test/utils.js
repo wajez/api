@@ -6,11 +6,14 @@ const runMiddlewares = async (middlewares, req, res) => {
   if (middlewares.length === 0)
     return {req, res}
   return new Promise((resolve, reject) => {
-    middlewares[0](req, res, () => resolve(runMiddlewares(middlewares.slice(1), req, res)))
+    middlewares[0](req, res, error =>
+      error ? resolve({error})
+      : resolve(runMiddlewares(middlewares.slice(1), req, res))
+    )
   })
 }
 
-const assertRoute = async (route, {method, uri, req, query, dbData, sentData}) => {
+const assertRoute = async (route, {method, uri, req, query, dbData, sentData, error}) => {
   req = req || {}
   req.params = req.params || {}
   req.query = req.query || {}
@@ -32,8 +35,15 @@ const assertRoute = async (route, {method, uri, req, query, dbData, sentData}) =
     ])
 
   const result = await runMiddlewares(middlewares(route), req, {})
-  if (sentData)
-    assert.deepEqual(result.req.wz.data, sentData)
+
+  if (error) {
+    assert.deepEqual(result.error, error)
+  } else {
+    assert.isUndefined(result.error)
+    if (sentData)
+      assert.deepEqual(result.req.wz.data, sentData)
+  }
+
   return result
 }
 

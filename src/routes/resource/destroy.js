@@ -1,13 +1,15 @@
 const {$, def, S} = require('wajez-utils')
-const T = require('../types')
-const helpers = require('../helpers')
-const {remove, extend} = require('../routes')
-const {onQuery, onRun, onConvert} = require('../actions')
-const {setQuery, runQuery, convertData} = require('../middlewares')
+const T = require('../../types')
+const helpers = require('../../helpers')
+const {remove, extend} = require('../basic')
+const {onQuery, onRun, onConvert, onReadParams} = require('../../actions')
+const {setQuery, runQuery, convertData, setModel, setRoute} = require('../../middlewares')
 const {merge, applyConverter} = require('wajez-utils')
 
 const destroy = (model, {converter, uri, actions, relations} = {}) =>
   extend(remove(helpers.uri(model) + '/:id', [
+    onReadParams(setModel(model.modelName)),
+    onReadParams(setRoute('destroy')),
     onQuery(setQuery(async req => ({
       type: 'remove',
       conditions: {_id: req.params.id},

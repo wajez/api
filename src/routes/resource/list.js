@@ -1,16 +1,18 @@
 const {$, def, S} = require('wajez-utils')
-const T = require('../types')
-const helpers = require('../helpers')
-const {get, extend} = require('../routes')
-const {onQuery, onRun, onConvert} = require('../actions')
+const T = require('../../types')
+const helpers = require('../../helpers')
+const {get, extend} = require('../basic')
+const {onQuery, onRun, onConvert, onReadParams, beforeQuery} = require('../../actions')
 const {merge, applyConverter} = require('wajez-utils')
 const {
-  setQuery, runQuery, convertData,
-  getOffset, getLimit, getSort
-} = require('../middlewares')
+  setQuery, runQuery, convertData, setRoute,
+  getOffset, getLimit, getSort, setModel
+} = require('../../middlewares')
 
 const list = (model, {converter, uri, actions} = {}) =>
   extend(get(helpers.uri(model), [
+    onReadParams(setModel(model.modelName)),
+    onReadParams(setRoute('list')),
     onQuery(setQuery(async req => ({
       type: 'find',
       conditions: {},

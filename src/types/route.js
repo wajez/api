@@ -2,11 +2,9 @@ const {$, S} = require('wajez-utils')
 const {_, Enum, Union, Optional} = require('./meta')
 const {Middleware} = require('./express')
 
-const RouteStep = $.Number
-
 const RouteAction = _({
-  step: RouteStep,
-  middleware: Middleware,
+  step: $.Number,
+  middlewares: $.Array(Middleware),
 })
 
 const RouteMethod = Enum('RouteMethod', ['get', 'post', 'put', 'delete'])
@@ -17,8 +15,6 @@ const Route = _({
   actions: $.Array(RouteAction)
 })
 
-const RouteUpdater = $.Function([Route, Route])
-
 const RouteConfig = $.Object
 
 // const RouteConfig = _({
@@ -28,10 +24,8 @@ const RouteConfig = $.Object
 // })
 
 module.exports = {
-  RouteStep,
   RouteMethod,
   RouteAction,
   Route,
-  RouteUpdater,
   RouteConfig
 }

@@ -2,7 +2,7 @@ const express = require('express')
 const {$, def, S, merge} = require('wajez-utils')
 const T = require('./types')
 const {middlewares, relationsOf} = require('./helpers')
-const {resource} = require('./resource')
+const {resource} = require('./routes')
 
 const addRoute = def('addRoute', {}, [T.Router, T.Route, T.Router],
   (router, route) => {
@@ -16,7 +16,7 @@ const router = def('router', {}, [$.Array(T.Route), T.Router],
 
 const api = (models, relations = [], configs = {}) => router(
   models.reduce((routes, model) => {
-    const config = merge({relations}, configs[model.modelName] || {})
+    const config = merge({relations}, merge(configs._all || {}, configs[model.modelName] || {}))
     return routes.concat(resource(model, config))
   }, [])
 )

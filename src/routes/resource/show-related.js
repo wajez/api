@@ -1,13 +1,13 @@
 const mongoose = require('mongoose')
 const {$, def, S, model} = require('wajez-utils')
-const T = require('../types')
-const helpers = require('../helpers')
-const {get, extend} = require('../routes')
-const {onQuery, onRun, beforeConvert, onConvert} = require('../actions')
+const T = require('../../types')
+const helpers = require('../../helpers')
+const {get, extend} = require('../basic')
+const {onQuery, onRun, beforeConvert, onConvert, onReadParams} = require('../../actions')
 const {
-  setQuery, runQuery, convertData, setData,
-  getData, getOffset, getLimit, getSort
-} = require('../middlewares')
+  setQuery, runQuery, convertData, setData, setModel,
+  setRoute, setRelated, getData, getOffset, getLimit, getSort
+} = require('../../middlewares')
 
 const showRelated = ({type, source, target}, config = {}) => {
   const parent = mongoose.model(source.name)
@@ -22,6 +22,9 @@ const showRelated = ({type, source, target}, config = {}) => {
 const showOneRelated = def('showOneRelated', {}, [T.MongooseModel, T.MongooseModel, $.String, T.RouteConfig, T.Route],
   (parent, child, field, {uri, converter, actions} = {}) =>
     extend(get(helpers.uri(parent) + '/:id/' + field, [
+      onReadParams(setModel(parent.modelName)),
+      onReadParams(setRelated(child.modelName)),
+      onReadParams(setRoute('show-one-related')),
       onQuery(setQuery(async req => ({
         type: 'find',
         conditions: {_id: req.params.id},
@@ -46,9 +49,11 @@ const showOneRelated = def('showOneRelated', {}, [T.MongooseModel, T.MongooseMod
 )
 
 const showManyRelated = def('showManyRelated', {}, [T.MongooseModel, T.MongooseModel, $.String, T.RouteConfig, T.Route],
-  (parent, child, field, {uri, converter, actions} = {}) => {
-    uri = uri || helpers.uri(parent) + '/:id/' + field
-    return get(uri, [
+  (parent, child, field, {uri, converter, actions} = {}) =>
+    extend(get(helpers.uri(parent) + '/:id/' + field, [
+      onReadParams(setModel(parent.modelName)),
+      onReadParams(setRelated(child.modelName)),
+      onReadParams(setRoute('show-many-related')),
       onQuery(setQuery(async req => ({
         type: 'find',
         conditions: {_id: req.params.id},
@@ -73,8 +78,7 @@ const showManyRelated = def('showManyRelated', {}, [T.MongooseModel, T.MongooseM
         return !instance ? null : (instance[field] || null)
       })),
       onConvert(convertData(helpers.routeConverter(child, converter || {})))
-    ].concat(actions || []))
-  }
+    ]), {uri, actions})
 )
 
 module.exports = {showRelated}

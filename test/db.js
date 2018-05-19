@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const {Schema} = mongoose
+const {oneOne, oneMany, manyOne, manyMany} = require('wajez-utils')
 
 const connect = async () => {
   mongoose.Promise = global.Promise
@@ -19,16 +20,6 @@ const disconnect = async () => {
   mongoose.connection.close()
 }
 
-const AlphaString = {
-  type: String,
-  match: /^[A-Za-z ]{5,25}$/
-}
-
-const AlphaText = {
-  type: String,
-  match: /^[A-Za-z ,-\.]{50,200}$/
-}
-
 const Category = mongoose.model('Category', new Schema({
   parent: {
     type: Schema.Types.ObjectId,
@@ -42,7 +33,11 @@ const Category = mongoose.model('Category', new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Post'
   }],
-  name: AlphaString
+  name: {
+    type: String,
+    required: true,
+    unique: true
+  }
 }))
 
 const User = mongoose.model('User', new Schema({
@@ -54,7 +49,10 @@ const User = mongoose.model('User', new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Account'
   },
-  name: AlphaString,
+  name: {
+    type: String,
+    default: 'Anonymous'
+  },
   picture: Buffer,
   since: Date,
   rank: Number
@@ -65,8 +63,22 @@ const Account = mongoose.model('Account', new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User'
   },
-  email: AlphaString,
-  password: AlphaString
+  type: {
+    type: String,
+    enum: ['admin', 'user']
+  },
+  active: Boolean,
+  email: {
+    type: String,
+    match: /^[^@]{2,30}@.{2,30}$/,
+    unique: true,
+    required: true
+  },
+  password: {
+    type: String,
+    minLength: 8,
+    required: true
+  }
 }))
 
 const Post = mongoose.model('Post', new Schema({
@@ -86,8 +98,13 @@ const Post = mongoose.model('Post', new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Tag'
   }],
-  title:  AlphaString,
-  content: AlphaText
+  title:  {
+    type: String,
+    minLength: 5,
+    maxLength: 50,
+    required: true
+  },
+  content: String
 }))
 
 const Comment = mongoose.model('Comment', new Schema({
@@ -99,7 +116,7 @@ const Comment = mongoose.model('Comment', new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User'
   },
-  content: AlphaText
+  content: String
 }))
 
 const Tag = mongoose.model('Tag', new Schema({
@@ -107,7 +124,21 @@ const Tag = mongoose.model('Tag', new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Post'
   }],
-  name: AlphaString
+  name: {
+    type: String,
+    required: true,
+    unique: true
+  }
 }))
 
-module.exports = {connect, disconnect, clean, Category, User, Account, Post, Comment, Tag}
+const relations = [
+  oneMany('Category', 'children', 'Category', 'parent'),
+  oneMany('Category', 'posts', 'Post', 'category'),
+  oneOne('User', 'account', 'Account', 'owner'),
+  oneMany('User', 'posts', 'Post', 'writer'),
+  oneMany('Post', 'comments', 'Comment', 'post'),
+  manyMany('Post', 'tags', 'Tag', 'posts'),
+  manyOne('Comment', 'writer', 'User', null)
+]
+
+module.exports = {connect, disconnect, clean, Category, User, Account, Post, Comment, Tag, relations}

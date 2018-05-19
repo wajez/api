@@ -1,7 +1,7 @@
 const {$, def, S} = require('wajez-utils')
-const T = require('./types')
-const {onStart, onReadParams, onSend, inTheEnd} = require('./actions')
-const {init, setOffset, setLimit, setSort, sendData, finish} = require('./middlewares')
+const T = require('../types')
+const {onStart, onReadParams, onSend, inTheEnd} = require('../actions')
+const {init, setOffset, setLimit, setSort, sendData, finish} = require('../middlewares')
 
 const defaultActions = [
   onStart(init()),

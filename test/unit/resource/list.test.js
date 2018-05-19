@@ -70,8 +70,7 @@ describe('Unit > Resource > list', () => {
   it('modifies the converter', () =>
     assertRoute(list(User, {
       converter: {
-        picture: _ => null,
-        title: user => `${user.name} (${user.rank})`
+        picture: _ => null
       }
     }), {
       method: 'get',
@@ -82,8 +81,7 @@ describe('Unit > Resource > list', () => {
         name: user.name,
         since: user.since,
         rank: user.rank,
-        picture: null,
-        title: `${user.name} (${user.rank})`
+        picture: null
       }))
     })
   )

@@ -26,6 +26,33 @@ const setParam = def('setParam', {}, [$.String, $.AnyFunction, $.String, $.Any, 
   }
 )
 
+const setRoute = def('setRoute', {}, [$.String, T.Middleware],
+  name => (req, res, next) => {
+    req.wz.route = name
+    next()
+  }
+)
+
+const getRoute = getParam('route')
+
+const setModel = def('setModel', {}, [$.String, T.Middleware],
+  name => (req, res, next) => {
+    req.wz.model = name
+    next()
+  }
+)
+
+const getModel = getParam('model')
+
+const setRelated = def('setRelated', {}, [$.String, T.Middleware],
+  name => (req, res, next) => {
+    req.wz.related = name
+    next()
+  }
+)
+
+const getRelated = getParam('related')
+
 const setQuery = def('setQuery', {}, [$.Any, T.Middleware],
   queryGetter => (req, res, next) => {
     queryGetter(req)
@@ -94,6 +121,12 @@ module.exports = {
   init,
   getParam,
   setParam,
+  setRoute,
+  getRoute,
+  setModel,
+  getModel,
+  setRelated,
+  getRelated,
   setQuery,
   getQuery,
   runQuery,
