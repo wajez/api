@@ -6,7 +6,7 @@ const {onQuery, onRun, onConvert, onReadParams, beforeQuery} = require('../../ac
 const {merge, applyConverter} = require('wajez-utils')
 const {
   setQuery, runQuery, convertData, setRoute,
-  getOffset, getLimit, getSort, setModel
+  getOffset, getLimit, getSort, setModel, getWhere
 } = require('../../middlewares')
 
 const list = (model, {converter, uri, actions} = {}) =>
@@ -15,7 +15,7 @@ const list = (model, {converter, uri, actions} = {}) =>
     onReadParams(setRoute('list')),
     onQuery(setQuery(async req => ({
       type: 'find',
-      conditions: req.body || {},
+      conditions: getWhere(req) || {},
       projection: null,
       options: {
         skip: getOffset(req),

@@ -37,7 +37,9 @@ describe('Unit > Resource > list', () => {
       method: 'get',
       uri: '/users',
       req: {
-        body: {name: 'Sasuke'}
+        query: {
+          where: '{"name": "Sasuke"}'
+        }
       },
       query: {
         type: 'find',

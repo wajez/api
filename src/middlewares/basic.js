@@ -21,7 +21,11 @@ const getParam = def('getParam', {}, [$.String, T.Request, $.Any],
 
 const setParam = def('setParam', {}, [$.String, $.AnyFunction, $.String, $.Any, T.Middleware],
   (name, validate, queryName, defaultValue) => (req, res, next) => {
-    req.wz[name] = validate(req.query[queryName] || defaultValue)
+    try {
+      req.wz[name] = validate(req.query[queryName])
+    } catch (err) {
+      req.wz[name] = defaultValue
+    }
     next()
   }
 )

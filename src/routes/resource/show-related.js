@@ -5,7 +5,7 @@ const helpers = require('../../helpers')
 const {get, extend} = require('../basic')
 const {onQuery, onRun, beforeConvert, onConvert, onReadParams} = require('../../actions')
 const {
-  setQuery, runQuery, convertData, setData, setModel,
+  setQuery, runQuery, convertData, setData, setModel, getWhere,
   setRoute, setRelated, getData, getOffset, getLimit, getSort
 } = require('../../middlewares')
 
@@ -63,7 +63,7 @@ const showManyRelated = def('showManyRelated', {}, [T.MongooseModel, T.MongooseM
         },
         populate: [{
           path: field,
-          match: req.body || {},
+          match: getWhere(req) || {},
           select: null,
           options: {
             skip: getOffset(req),

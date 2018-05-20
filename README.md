@@ -134,7 +134,7 @@ app.use((err, req, res, next) => {
 
 That's all, we now have a functional REST API with the following routes and features:
 
-- `GET /users`: returns an array of users with format `{id, name, type, email, password}`. The query parameters `offset`, `limit` and `sort` can be used to sort by a field and specify the range of users to return. By default `offset = 0` and `limit = 100`.
+- `GET /users`: returns an array of users with format `{id, name, type, email, password}`. The query parameters `offset`, `limit` and `sort` can be used to sort by a field, specify the range of users to return. By default `offset = 0` and `limit = 100`. The query parameter `where` can be used to filter results.
 - `GET /users/:id`: returns the single user having the `id` or `null` if not found.
 - `GET /users/:id/posts`: returns the list of posts of a specific user. The query parameters `offset`, `limit` and `sort` are supported.
 - `POST /users`: adds and returns a new user with the data in `req.body`. Giving the `posts` attribute as array of ids will update the corresponding posts to use the added user as their `writer`. if some of the posts are missing or have already a `writer`, an error is returned.
@@ -486,8 +486,8 @@ Constructs a route that returns a list of the given model, then merges the `conv
 
 - `GET /plural-of-model-name`
 - The default converter returns only fields of basic types (`String`, `Number`, `Boolean`, `Buffer`, `Date`) and the `id` of the document. It ignores all `ObjectId`, `Object` and `Array` fields.
-- Conditions on `req.body` will be used to filter the results.
-- The offset parameter is set from query parameter `offset`, same for limit and sort parameters.
+- The offset parameter is set from query parameter `offset`, same for `limit`, `sort`, and `where` parameters.
+- The `where` parameter is parsed as JSON and used as query conditions if given.
 - Default values for offset and limit are `0` and `100` respectively. No sort is defined by default.
 
 ### show
@@ -705,6 +705,8 @@ makes an express router from an array of routes.
 Returns an express router containing all [`resource`](#resource) routes of all given models. Passes `relations` and `_all` config, if given, to all models, merged with the corresponding config if exists.
 
 # Development Notes
+
+- **1.3.0:** The query parameter `where` is now used to filter results on `list` and `show-many-related` routes.
 
 - **1.2.0:** `req.body` is now used to filter results on `list` and `show-many-related` routes.
 
