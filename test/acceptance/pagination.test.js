@@ -24,13 +24,18 @@ describe('Acceptance > Pagination and Sort', () => {
   it.get('/users?limit=200', {
     verify: (res, done) => {
       assert.lengthOf(res.body, 150)
+      assert.equal(res.get('Content-Total'), 150)
       users = res.body
       done()
     }
   })
 
   it.get('/users', {
-    body: () => users.slice(0, 100)
+    body: () => users.slice(0, 100),
+    verify: (res, done) => {
+      assert.equal(res.get('content-total'), 150)
+      done()
+    }
   })
 
   it.get('/users?offset=17&limit=24', {

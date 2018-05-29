@@ -58,53 +58,65 @@ const setRelated = def('setRelated', {}, [$.String, T.Middleware],
 const getRelated = getParam('related')
 
 const setQuery = def('setQuery', {}, [$.Any, T.Middleware],
-  queryGetter => (req, res, next) => {
-    queryGetter(req)
-    .then(q => {
-      req.wz.query = q
+  queryGetter => async (req, res, next) => {
+    try {
+      req.wz.query = await queryGetter(req)
       next()
-    })
-    .catch(err => next(err))
+    } catch (err) {
+      next(err)
+    }
   }
 )
 
 const getQuery = getParam('query')
 
 const runQuery = def('run', {}, [T.MongooseModel, T.Middleware],
-  model => (req, res, next) => {
-    applyQuery(getQuery(req), model)
-    .then(data => {
-      req.wz.data = data
+  model => async (req, res, next) => {
+    try {
+      req.wz.data = await applyQuery(getQuery(req), model)
       next()
-    })
-    .catch(err => next(err))
+    } catch (err) {
+      next(err)
+    }
   }
 )
 
 const setData = def('setData', {}, [$.Any, T.Middleware],
-  dataGetter => (req, res, next) => {
-    dataGetter(req)
-    .then(data => {
-      req.wz.data = data
+  dataGetter => async (req, res, next) => {
+    try {
+      req.wz.data = await dataGetter(req)
       next()
-    })
-    .catch(err => next(err))
+    } catch (err) {
+      next(err)
+    }
   }
 )
 
 const getData = getParam('data')
 
-const convertData = def('convert', {}, [$.AnyFunction, T.Middleware],
-  converterGetter => (req, res, next) => {
-    converterGetter(req)
-    .then(fn => {
+const convertData = def('convertData', {}, [$.AnyFunction, T.Middleware],
+  converterGetter => async (req, res, next) => {
+    try {
       const data = getData(req)
       if (data == null)
         return next()
+      const fn = await converterGetter(req)
       req.wz.data = fn(data)
       next()
-    })
-    .catch(err => next(err))
+    } catch (err) {
+      next(err)
+    }
+  }
+)
+
+const setHeader = def('setHeader', {}, [$.String, $.AnyFunction, T.Middleware],
+  (headerName, valueGetter) => async (req, res, next) => {
+    try {
+      res.set(headerName, await valueGetter(req))
+      next()
+    } catch (err) {
+      next(err)
+    }
   }
 )
 
@@ -137,6 +149,7 @@ module.exports = {
   setData,
   getData,
   convertData,
+  setHeader,
   sendData,
   finish
 }

@@ -2,12 +2,15 @@ const {$, def, S} = require('wajez-utils')
 const T = require('../../types')
 const helpers = require('../../helpers')
 const {get, extend} = require('../basic')
-const {onQuery, onRun, onConvert, onReadParams, beforeQuery} = require('../../actions')
+const {
+  onQuery, onRun, onConvert, onReadParams, beforeQuery, beforeSend
+} = require('../../actions')
 const {merge, applyConverter} = require('wajez-utils')
 const {
-  setQuery, runQuery, convertData, setRoute,
+  setQuery, runQuery, convertData, setRoute, setHeader,
   getOffset, getLimit, getSort, setModel, getWhere
 } = require('../../middlewares')
+const {applyQuery} = require('../../query')
 
 const list = (model, {converter, uri, actions} = {}) =>
   extend(get(helpers.uri(model), [
@@ -25,6 +28,12 @@ const list = (model, {converter, uri, actions} = {}) =>
       populate: []
     }))),
     onRun(runQuery(model)),
+    beforeSend(setHeader('Content-Total', async req =>
+      applyQuery({
+        type: 'count',
+        conditions: getWhere(req) || {}
+      }, model)
+    )),
     onConvert(convertData(helpers.routeConverter(model, converter || {})))
   ]), {uri, actions})
 

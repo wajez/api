@@ -157,7 +157,7 @@ describe('Acceptance > One to Many Relation', () => {
   // check users1 posts
   it.get('/users/:id/posts', {
     params: () => users[1],
-    body: () => [posts[9], posts[0], posts[1]]
+    body: () => [posts[1], posts[9], posts[0]]
   })
   // check posts 9, 0 and 1 has user1 as writer
   it.get('/posts/:id/writer', {
