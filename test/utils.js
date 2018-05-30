@@ -34,7 +34,10 @@ const assertRoute = async (route, {method, uri, req, query, dbData, sentData, er
       })
     ])
 
-  const result = await runMiddlewares(middlewares(route), req, {})
+  const res = {
+    set: () => {}
+  }
+  const result = await runMiddlewares(middlewares(route), req, res)
 
   if (error) {
     assert.deepEqual(result.error, error)

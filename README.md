@@ -134,7 +134,7 @@ app.use((err, req, res, next) => {
 
 That's all, we now have a functional REST API with the following routes and features:
 
-- `GET /users`: returns an array of users with format `{id, name, type, email, password}`. The query parameters `offset`, `limit` and `sort` can be used to sort by a field, specify the range of users to return. By default `offset = 0` and `limit = 100`. The query parameter `where` can be used to filter results.
+- `GET /users`: returns an array of users with format `{id, name, type, email, password}`. The response header `Content-Total` will contain the total count of results. The query parameters `offset`, `limit` and `sort` can be used to sort by a field, specify the range of users to return. By default `offset = 0` and `limit = 100`. The query parameter `where` can be used to filter results.
 - `GET /users/:id`: returns the single user having the `id` or `null` if not found.
 - `GET /users/:id/posts`: returns the list of posts of a specific user. The query parameters `offset`, `limit` and `sort` are supported.
 - `POST /users`: adds and returns a new user with the data in `req.body`. Giving the `posts` attribute as array of ids will update the corresponding posts to use the added user as their `writer`. if some of the posts are missing or have already a `writer`, an error is returned.
@@ -215,7 +215,7 @@ Let's start by listing the defined data types in this library.
 
 ### Query Types
 
-- `Query`: one of `CreateQuery`, `FindQuery`, `UpdateQuery`, and `RemoveQuery`.
+- `Query`: one of `CreateQuery`, `FindQuery`, `CountQuery`, `UpdateQuery`, and `RemoveQuery`.
 
 - `CreateQuery`: an object of format
 
@@ -241,6 +241,15 @@ Let's start by listing the defined data types in this library.
     select: String | null,
     options: Object
   })
+}
+```
+
+- `CountQuery`: an object of format
+
+```js
+{
+  type: 'count',
+  conditions: Object
 }
 ```
 
@@ -489,6 +498,7 @@ Constructs a route that returns a list of the given model, then merges the `conv
 - The offset parameter is set from query parameter `offset`, same for `limit`, `sort`, and `where` parameters.
 - The `where` parameter is parsed as JSON and used as query conditions if given.
 - Default values for offset and limit are `0` and `100` respectively. No sort is defined by default.
+- The response header `Content-Total` will contain the total count of items matching the `where` conditions.
 
 ### show
 
@@ -705,6 +715,8 @@ makes an express router from an array of routes.
 Returns an express router containing all [`resource`](#resource) routes of all given models. Passes `relations` and `_all` config, if given, to all models, merged with the corresponding config if exists.
 
 # Development Notes
+
+- **1.4.0:** The response of `list` and `showRelated` contains now a header `Content-Total` equal to the total count of items; useful for pagination.
 
 - **1.3.0:** The query parameter `where` is now used to filter results on `list` and `show-many-related` routes.
 

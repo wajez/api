@@ -24,6 +24,11 @@ const FindQuery = _({
   }))
 })
 
+const CountQuery = _({
+  type: Enum('FindQueryType', ['count']),
+  conditions: QueryConditions
+})
+
 const RemoveQuery = _({
   type: Enum('RemoveQueryType', ['remove']),
   conditions: QueryConditions,
@@ -46,6 +51,7 @@ const UpdateQuery = _({
 const Query = Union('Query', [
   CreateQuery,
   FindQuery,
+  CountQuery,
   UpdateQuery,
   RemoveQuery,
   MockQuery

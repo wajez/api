@@ -1,12 +1,13 @@
 const mongoose = require('mongoose')
-const {$, def, S, model} = require('wajez-utils')
+const {$, def, S, model, merge} = require('wajez-utils')
 const T = require('../../types')
 const helpers = require('../../helpers')
 const {get, extend} = require('../basic')
+const {applyQuery} = require('../../query')
 const {onQuery, onRun, beforeConvert, onConvert, onReadParams} = require('../../actions')
 const {
-  setQuery, runQuery, convertData, setData, setModel, getWhere,
-  setRoute, setRelated, getData, getOffset, getLimit, getSort
+  setQuery, runQuery, convertData, setData, setModel, getWhere, getQuery,
+  setRoute, setRelated, getData, getOffset, getLimit, getSort, setHeader
 } = require('../../middlewares')
 
 const showRelated = ({type, source, target}, config = {}) => {
@@ -54,29 +55,37 @@ const showManyRelated = def('showManyRelated', {}, [T.MongooseModel, T.MongooseM
       onReadParams(setModel(parent.modelName)),
       onReadParams(setRelated(child.modelName)),
       onReadParams(setRoute('show-many-related')),
-      onQuery(setQuery(async req => ({
-        type: 'find',
-        conditions: {_id: req.params.id},
-        projection: '_id',
-        options: {
-          limit: 1
-        },
-        populate: [{
-          path: field,
-          match: getWhere(req) || {},
-          select: null,
+      onQuery(setQuery(async req => {
+        const [parentItem] = await applyQuery({
+          type: 'find',
+          conditions: {_id: req.params.id},
+          projection: '_id ' + field,
+          options: { limit: 1 },
+          populate: []
+        }, parent)
+        if (!parentItem)
+          return {type: 'mock', data: []}
+        return {
+          type: 'find',
+          conditions: merge(getWhere(req) || {}, {_id: {$in: parentItem[field]}}),
+          projection: null,
           options: {
             skip: getOffset(req),
             limit: getLimit(req),
             sort: getSort(req)
-          }
-        }]
-      }))),
-      onRun(runQuery(parent)),
-      beforeConvert(setData(async req => {
-        const instance = getData(req)[0]
-        return !instance ? null : (instance[field] || null)
+          },
+          populate: []
+        }
       })),
+      onRun(runQuery(child)),
+      onRun(setHeader('Content-Total', async req => {
+        const query = getQuery(req)
+        return applyQuery({
+          type: 'count',
+          conditions: query.conditions
+        }, child)
+      })),
+      onRun(setHeader('access-control-expose-headers', async () => 'Content-Total')),
       onConvert(convertData(helpers.routeConverter(child, converter || {})))
     ]), {uri, actions})
 )

@@ -10,6 +10,8 @@ const applyQuery = def('applyQuery', {}, [T.Query, T.MongooseModel, $.Any],
       return applyCreateQuery(query, model)
     if (query.type === 'find')
       return applyFindQuery(query, model)
+    if (query.type === 'count')
+      return applyCountQuery(query, model)
     if (query.type === 'update')
       return applyUpdateQuery(query, model)
     if (query.type === 'remove')
@@ -25,6 +27,12 @@ const applyCreateQuery = def('applyCreateQuery', {}, [T.Query, T.MongooseModel, 
     const created = await model.create(query.data)
     await after(query, null, created)
     return created
+  }
+)
+
+const applyCountQuery = def('applyCountQuery', {}, [T.Query, T.MongooseModel, $.Any],
+  async (query, model) => {
+    return model.count(query.conditions)
   }
 )
 

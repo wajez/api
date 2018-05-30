@@ -1,10 +1,11 @@
 const {assert} = require('chai')
-const {User, Post, Comment} = require('../../db')
+const {connect, disconnect, User, Post, Comment} = require('../../db')
 const {assertRoute} = require('../../utils')
 const {list, onReadParams, setOffset} = require('../../../src')
 const {id, merge} = require('wajez-utils')
 
 describe('Unit > Resource > list', () => {
+  before(connect)
 
   const now = new Date()
 
@@ -166,4 +167,5 @@ describe('Unit > Resource > list', () => {
     })
   )
 
+  after(disconnect)
 })
