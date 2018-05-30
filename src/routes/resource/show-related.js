@@ -85,6 +85,7 @@ const showManyRelated = def('showManyRelated', {}, [T.MongooseModel, T.MongooseM
           conditions: query.conditions
         }, child)
       })),
+      onRun(setHeader('access-control-expose-headers', async () => 'Content-Total')),
       onConvert(convertData(helpers.routeConverter(child, converter || {})))
     ]), {uri, actions})
 )

@@ -34,6 +34,7 @@ const list = (model, {converter, uri, actions} = {}) =>
         conditions: getWhere(req) || {}
       }, model)
     )),
+    beforeSend(setHeader('access-control-expose-headers', async () => 'Content-Total')),
     onConvert(convertData(helpers.routeConverter(model, converter || {})))
   ]), {uri, actions})
 
