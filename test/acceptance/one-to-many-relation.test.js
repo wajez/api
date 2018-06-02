@@ -71,6 +71,13 @@ describe('Acceptance > One to Many Relation', () => {
     params: () => users[0],
     data: () => ({posts: posts.map(_ => _.id)})
   })
+  it.get('/posts', {
+    verify: (res, done) => {
+      for (let i = 1; i < 10; i ++)
+        posts[i] = res.body[i]
+      done()
+    }
+  })
   // check user0 list contains all posts
   it.get('/users/:id/posts', {
     params: () => users[0],
@@ -95,6 +102,13 @@ describe('Acceptance > One to Many Relation', () => {
     data: () => merge(users[1], {posts: [posts[9].id]}),
     verify: (res, done) => {
       users[1] = res.body
+      done()
+    }
+  })
+  it.get('/posts', {
+    verify: (res, done) => {
+      for (let i = 1; i < 10; i ++)
+        posts[i] = res.body[i]
       done()
     }
   })
@@ -139,7 +153,7 @@ describe('Acceptance > One to Many Relation', () => {
   }
   // add post0
   it.post('/posts', {
-    data: () => merge(posts[0], {id: undefined}),
+    data: () => merge(posts[0], {id: undefined, writer: null}),
     verify: (res, done) => {
       posts[0] = res.body
       done()
@@ -157,7 +171,11 @@ describe('Acceptance > One to Many Relation', () => {
   // check users1 posts
   it.get('/users/:id/posts', {
     params: () => users[1],
-    body: () => [posts[1], posts[9], posts[0]]
+    body: () => [
+      merge(posts[1], {writer: users[1].id}),
+      posts[9],
+      merge(posts[0], {writer: users[1].id})
+    ]
   })
   // check posts 9, 0 and 1 has user1 as writer
   it.get('/posts/:id/writer', {

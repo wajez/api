@@ -56,6 +56,7 @@ describe('Unit > Resource > list', () => {
       dbData: users,
       sentData: users.map(user => ({
         id: id(user.id),
+        account: id(user.account),
         name: user.name,
         since: user.since,
         rank: user.rank,
@@ -84,6 +85,7 @@ describe('Unit > Resource > list', () => {
       dbData: users,
       sentData: users.map(user => ({
         id: id(user.id),
+        account: id(user.account),
         name: user.name,
         since: user.since,
         rank: user.rank,

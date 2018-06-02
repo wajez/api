@@ -43,7 +43,9 @@ const defaultConverter = def('defaultConverter', {}, [T.MongooseModel, $.Any],
       const field = fields[name]
       if (field.type === 'buffer')
         result[name] = toString
-      else if (field.type != 'reference' && field.type != 'object' && field.type != 'array')
+      else if (field.type === 'reference')
+        result[name] = id
+      else if (field.type != 'object' && field.type != 'array')
         result[name] = I
       return result
     }, {id})

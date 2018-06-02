@@ -149,7 +149,7 @@ The `writer` attribute of the involved posts will be updated accordingly.
 
 - `DELETE /users/:id`: removes the user having the `id` and sets the `writer` attribute of his posts to `null`.
 
-- `GET /posts`: similar to `GET /users`, the format of a post is `{id, title, content}`.
+- `GET /posts`: similar to `GET /users`, the format of a post is `{id, category, writer, title, content}`. `category` and `writer` contains the identifiers of the related resources.
 - `GET /posts/:id`: similar to `GET /users/:id`.
 - `GET /posts/:id/writer`: returns the writer (user) of a specific post.
 - `GET /posts/:id/category`: returns the category of a specific post.
@@ -157,7 +157,7 @@ The `writer` attribute of the involved posts will be updated accordingly.
 - `PUT /posts/:id`: modifies a specific post.
 - `DELETE /posts/:id`: removes a specific post and removes its id from the `posts` of the corresponding user and category.
 
-- `GET /categories`: similar to `GET /users`. The format of a category is `{id, name}`
+- `GET /categories`: similar to `GET /users`. The format of a category is `{id, parent, name}`
 - `GET /categories/:id`: returns a specific category or `null` if missing.
 - `GET /categories/:id/parent`: returns the parent of the category or `null` if missing.
 - `GET /categories/:id/children`: returns the list of subcategories of the category or `null` if missing.
@@ -494,7 +494,7 @@ Creates a `POST` route to `/login` (overwritten by `uri` if given) that performs
 Constructs a route that returns a list of the given model, then merges the `converter` if given with the default converter, and extends the route using the `uri` and `actions` if any. By default:
 
 - `GET /plural-of-model-name`
-- The default converter returns only fields of basic types (`String`, `Number`, `Boolean`, `Buffer`, `Date`) and the `id` of the document. It ignores all `ObjectId`, `Object` and `Array` fields.
+- The default converter returns only fields of types (`ObjectId`, `String`, `Number`, `Boolean`, `Buffer`, `Date`). It ignores all `Object` and `Array` fields.
 - The offset parameter is set from query parameter `offset`, same for `limit`, `sort`, and `where` parameters.
 - The `where` parameter is parsed as JSON and used as query conditions if given.
 - Default values for offset and limit are `0` and `100` respectively. No sort is defined by default.
@@ -715,6 +715,8 @@ makes an express router from an array of routes.
 Returns an express router containing all [`resource`](#resource) routes of all given models. Passes `relations` and `_all` config, if given, to all models, merged with the corresponding config if exists.
 
 # Development Notes
+
+- **1.5.0:** The default resource converter now returns fields of type `ObjectId`.
 
 - **1.4.0:** The response of `list` and `showRelated` contains now a header `Content-Total` equal to the total count of items; useful for pagination.
 

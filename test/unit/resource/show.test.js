@@ -131,6 +131,7 @@ describe('Unit > Resource > show', () => {
       dbData: [user],
       sentData: {
         id: '111111',
+        account: '551111',
         posts: [{
           id: '221111',
           title: 'Post 1',
