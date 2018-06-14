@@ -16,6 +16,7 @@ describe('Unit > Resource > list', () => {
       Buffer.from('221111', 'hex'),
       Buffer.from('222222', 'hex'),
     ],
+    postsLength: 2,
     name: 'Naruto',
     picture: Buffer.from('kagi-bunshen-picture'),
     since: now,
@@ -27,6 +28,7 @@ describe('Unit > Resource > list', () => {
       Buffer.from('223333', 'hex'),
       Buffer.from('224444', 'hex'),
     ],
+    postsLength: 2,
     name: 'Sasuke',
     picture: Buffer.from('katun-picture'),
     since: now,
@@ -60,6 +62,7 @@ describe('Unit > Resource > list', () => {
         name: user.name,
         since: user.since,
         rank: user.rank,
+        postsLength: user.postsLength,
         picture: user.picture.toString()
       }))
     })
@@ -89,6 +92,7 @@ describe('Unit > Resource > list', () => {
         name: user.name,
         since: user.since,
         rank: user.rank,
+        postsLength: user.postsLength,
         picture: null
       }))
     })

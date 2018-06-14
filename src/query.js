@@ -24,6 +24,15 @@ const applyQuery = def('applyQuery', {}, [T.Query, T.MongooseModel, $.Any],
 
 const applyCreateQuery = def('applyCreateQuery', {}, [T.Query, T.MongooseModel, $.Any],
   async (query, model) => {
+    for (const field in query.data) {
+      if (
+        query.data[field] &&
+        query.data[field].constructor === Array &&
+        model.schema.obj[field + 'Length'] !== undefined
+      ) {
+        query.data[field + 'Length'] = query.data[field].length
+      }
+    }
     const created = await model.create(query.data)
     await after(query, null, created)
     return created
@@ -56,6 +65,16 @@ const applyUpdateQuery = def('applyUpdateQuery', {}, [T.Query, T.MongooseModel, 
         query.data[field] = Object.keys(values)
       }
       delete query.data.$operations
+    }
+
+    for (const field in query.data) {
+      if (
+        query.data[field] &&
+        query.data[field].constructor === Array &&
+        model.schema.obj[field + 'Length'] !== undefined
+      ) {
+        query.data[field + 'Length'] = query.data[field].length
+      }
     }
 
     const updated = await model.findOneAndUpdate(query.conditions, query.data, {new: true, runValidators: true})
@@ -224,15 +243,25 @@ const afterManyOne = def('afterManyOne', {}, [T.Relation, $.Any, $.Any, $.Any],
     if (!target.field)
       return null
 
+    const model = mongoose.model(target.name)
+    const hasLength = (model.schema.obj[target.field + 'Length'] !== undefined)
     if (old && old[source.field] && (!updated || updated[source.field] != old[source.field])) {
       const data = {$pull: {}}
       data.$pull[target.field] = old._id
-      await mongoose.model(target.name).findOneAndUpdate({_id: old[source.field]}, data, {new: true, runValidators: true})
+      if (hasLength) {
+        data.$inc = {}
+        data.$inc[target.field + 'Length'] = -1
+      }
+      await model.findOneAndUpdate({_id: old[source.field]}, data, {new: true, runValidators: true})
     }
     if (updated && updated[source.field] && (!old || old[source.field] != updated[source.field])) {
       const data = {$addToSet: {}}
       data.$addToSet[target.field] = updated._id
-      await mongoose.model(target.name).findOneAndUpdate({_id: updated[source.field]}, data, {new: true, runValidators: true})
+      if (hasLength) {
+        data.$inc = {}
+        data.$inc[target.field + 'Length'] = 1
+      }
+      await model.findOneAndUpdate({_id: updated[source.field]}, data, {new: true, runValidators: true})
     }
   }
 )
@@ -269,14 +298,25 @@ const afterManyMany = def('afterManyMany', {}, [T.Relation, $.Any, $.Any, $.Any]
     const removedIds = oldIds.filter(id => !newIds.map(_ => _.toString()).includes(id.toString()))
     const addedIds = newIds.filter(id => !oldIds.map(_ => _.toString()).includes(id.toString()))
 
+    const model = mongoose.model(target.name)
+    const hasLength = (model.schema.obj[target.field + 'Length'] !== undefined)
+
     if (removedIds.length > 0) {
       const data = {$pull: {}}
       data.$pull[target.field] = old._id
+      if (hasLength) {
+        data.$inc = {}
+        data.$inc[target.field + 'Length'] = -1
+      }
       await mongoose.model(target.name).updateMany({_id: {$in: removedIds}}, data, {new: true, runValidators: true})
     }
     if (addedIds.length > 0) {
       const data = {$addToSet: {}}
       data.$addToSet[target.field] = updated._id
+      if (hasLength) {
+        data.$inc = {}
+        data.$inc[target.field + 'Length'] = 1
+      }
       await mongoose.model(target.name).updateMany({_id: {$in: addedIds}}, data, {new: true, runValidators: true})
     }
   }

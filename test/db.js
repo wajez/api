@@ -44,6 +44,10 @@ const User = mongoose.model('User', new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Post'
   }],
+  postsLength: {
+    type: Number,
+    default: 0
+  },
   account: {
     type: Schema.Types.ObjectId,
     ref: 'Account'
@@ -95,6 +99,10 @@ const Post = mongoose.model('Post', new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Tag'
   }],
+  tagsLength: {
+    type: Number,
+    default: 0
+  },
   title:  {
     type: String,
     minLength: 5,

@@ -716,6 +716,8 @@ Returns an express router containing all [`resource`](#resource) routes of all g
 
 # Development Notes
 
+- **1.6.0:** When updating an array field `items`, the field `itemsLength` is auto-updated if present.
+
 - **1.5.0:** The default resource converter now returns fields of type `ObjectId`.
 
 - **1.4.0:** The response of `list` and `showRelated` contains now a header `Content-Total` equal to the total count of items; useful for pagination.

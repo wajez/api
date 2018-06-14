@@ -30,6 +30,7 @@ describe('Unit > Resource > show', () => {
       title: 'Post 2',
       content: 'Post 2 content here'
     }],
+    postsLength: 2,
     name: 'Naruto',
     picture: Buffer.from('kagi-bunshen-picture'),
     since: now,
@@ -141,6 +142,7 @@ describe('Unit > Resource > show', () => {
           title: 'Post 2',
           content: 'Post 2 content here'
         }],
+        postsLength: 2,
         name: 'Naruto',
         picture: Buffer.from('kagi-bunshen-picture').toString(),
         since: now,

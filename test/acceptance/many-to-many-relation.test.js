@@ -6,7 +6,12 @@ const {model, generate, merge, S} = require('wajez-utils')
 
 const it = require('wajez-api-test')(require('./app'))
 
-const makePost = generate(model(Post))
+const makePost = () => {
+  const post = generate(model(Post))()
+  post.tagsLength = 0
+  return post
+}
+
 const makeTag = generate(model(Tag))
 
 describe('Acceptance > Many to Many Relation', () => {
@@ -49,6 +54,15 @@ describe('Acceptance > Many to Many Relation', () => {
     params: () => posts[0],
     body: () => [tags[0]]
   })
+  // check post0's tagsLength
+  it.get('/posts/:id', {
+    params: () => posts[0],
+    verify: (res, done) => {
+      assert.equal(res.body.tagsLength, 1)
+      posts[0].tagsLength = 1
+      done()
+    }
+  })
   // check tag0 has post0
   it.get('/tags/:id/posts', {
     params: () => tags[0],
@@ -61,6 +75,15 @@ describe('Acceptance > Many to Many Relation', () => {
     data: () => ({
       posts: {add: [posts[1].id]}
     })
+  })
+  // check post1's tagsLength
+  it.get('/posts/:id', {
+    params: () => posts[1],
+    verify: (res, done) => {
+      assert.equal(res.body.tagsLength, 1)
+      posts[1].tagsLength = 1
+      done()
+    }
   })
   // check tag0 has posts 0 and 1
   it.get('/tags/:id/posts', {
@@ -83,6 +106,24 @@ describe('Acceptance > Many to Many Relation', () => {
     data: () => ({
       posts: {add: [posts[2].id], remove: [posts[0].id]}
     })
+  })
+  // check post0's tagsLength
+  it.get('/posts/:id', {
+    params: () => posts[0],
+    verify: (res, done) => {
+      assert.equal(res.body.tagsLength, 0)
+      posts[0].tagsLength = 0
+      done()
+    }
+  })
+  // check post2's tagsLength
+  it.get('/posts/:id', {
+    params: () => posts[2],
+    verify: (res, done) => {
+      assert.equal(res.body.tagsLength, 1)
+      posts[2].tagsLength = 1
+      done()
+    }
   })
   // check post0 has no tags
   it.get('/posts/:id/tags', {
@@ -113,6 +154,15 @@ describe('Acceptance > Many to Many Relation', () => {
       done()
     }
   })
+  // check post3's tagsLength
+  it.get('/posts/:id', {
+    params: () => posts[3],
+    verify: (res, done) => {
+      assert.equal(res.body.tagsLength, tags.length)
+      posts[3].tagsLength = tags.length
+      done()
+    }
+  })
   // check post 3 has all tags
   it.get('/posts/:id/tags', {
     params: () => posts[3],
@@ -136,6 +186,15 @@ describe('Acceptance > Many to Many Relation', () => {
   // remove tag2
   it.delete('/tags/:id', {
     params: () => tags[2]
+  })
+  // check post3's tagsLength
+  it.get('/posts/:id', {
+    params: () => posts[3],
+    verify: (res, done) => {
+      assert.equal(res.body.tagsLength, 2)
+      posts[3].tagsLength = 2
+      done()
+    }
   })
   // check post3 has tags 0 and 1
   it.get('/posts/:id/tags', {

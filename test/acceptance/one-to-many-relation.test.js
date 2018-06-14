@@ -9,6 +9,7 @@ const it = require('wajez-api-test')(require('./app'))
 const makeUser = () => {
   const user = generate(model(User))()
   user.picture = user.picture.toString()
+  user.postsLength = 0
   return user
 }
 
@@ -46,6 +47,15 @@ describe('Acceptance > One to Many Relation', () => {
       done()
     }
   })
+  // check user0's postsLength is incremented
+  it.get('/users/:id', {
+    params: () => users[0],
+    verify: (res, done) => {
+      assert.equal(res.body.postsLength, 1)
+      users[0].postsLength = 1
+      done()
+    }
+  })
   // check user0 posts list contains post0
   it.get('/users/:id/posts', {
     params: () => users[0],
@@ -70,6 +80,15 @@ describe('Acceptance > One to Many Relation', () => {
   it.put('/users/:id', {
     params: () => users[0],
     data: () => ({posts: posts.map(_ => _.id)})
+  })
+  // check user0's postsLength is incremented
+  it.get('/users/:id', {
+    params: () => users[0],
+    verify: (res, done) => {
+      assert.equal(res.body.postsLength, 10)
+      users[0].postsLength = 10
+      done()
+    }
   })
   it.get('/posts', {
     verify: (res, done) => {
@@ -136,6 +155,14 @@ describe('Acceptance > One to Many Relation', () => {
     params: () => users[0],
     body: () => posts.slice(1, 9)
   })
+  it.get('/users/:id', {
+    params: () => users[0],
+    verify: (res, done) => {
+      assert.equal(res.body.postsLength, 8)
+      users[0].postsLength = 8
+      done()
+    }
+  })
   // remove user0
   it.delete('/users/:id', {
     params: () => users[0]
@@ -177,6 +204,14 @@ describe('Acceptance > One to Many Relation', () => {
       merge(posts[0], {writer: users[1].id})
     ]
   })
+  it.get('/users/:id', {
+    params: () => users[1],
+    verify: (res, done) => {
+      assert.equal(res.body.postsLength, 3)
+      users[1].postsLength = 3
+      done()
+    }
+  })
   // check posts 9, 0 and 1 has user1 as writer
   it.get('/posts/:id/writer', {
     params: () => posts[9],
@@ -199,6 +234,13 @@ describe('Acceptance > One to Many Relation', () => {
         remove: [posts[9].id]
       }
     })
+  })
+  it.get('/users/:id', {
+    params: () => users[1],
+    verify: (res, done) => {
+      assert.equal(res.body.postsLength, 3)
+      done()
+    }
   })
   // check post9 has no writer
   it.get('/posts/:id/writer', {
