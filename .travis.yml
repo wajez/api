@@ -1,7 +1,7 @@
 language: node_js
 node_js:
-  - "9.11.0"
-  - "8.11.0"
+  - "10.10.0"
+  - "8.12.0"
 script: npm test
 services: mongodb
 after_success: npm run coveralls
